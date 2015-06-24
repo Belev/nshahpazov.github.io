@@ -230,7 +230,6 @@ By definition "linked list is a data structure consisting of a group of nodes wh
 
 We want to represent a simple object consisting of data and a reference to another node.
 
-// add a d3 floating node example here
 {% highlight javascript %}
 function Node(data) {
   this.data = data;
@@ -251,10 +250,6 @@ Node.prototype.setNext(next) {
 }
 {% endhighlight %}
 
-Lets see how it looks when we use it.
-
-<div id="second-canvas" class="node-canvas"></div>
-<a id="second-btn" class="btn">Add New One</a>
 
 The Node is the heart of the linked list data structure and as you can see we are only inserting at the end of the last inserted node.
 OK. Lets wrap what we have so far in a LinkedList class constructor.
@@ -272,7 +267,7 @@ At this point you are probably thinking. "Wait a minute! This thing starts to lo
 
 I am showing you all this because there's a fundamental concept in the Linked List. And that is the reference. In an array we have cells with data where we can query whichever element of the array as long as we know it's index. Here we have a reference connected to a reference, connected to a reference and so on. It's an entirely different view on the matter of connection of objects.
 
-
+If you still interested in what else we can do with this data structure lets see what we have to do to insert a new element in our list.
 
 {% highlight js %}
 LinkedList.prototype.insert = function (data) {
@@ -280,6 +275,11 @@ LinkedList.prototype.insert = function (data) {
 // else attach it to last and increase size
 }
 {% endhighlight %}
+
+Lets see how it looks when we use it.
+
+<div id="second-canvas" class="node-canvas"></div>
+<a id="second-btn" class="btn">Add New One</a>
 
 // add button with example adding
 
