@@ -41,7 +41,7 @@ date: 2015-06-24T12:46:11+03:00
 
     this.force = d3.layout.force()
       .charge(charge)
-      .gravity(0.003)
+      // .gravity(0.003)
       .linkDistance(40)
       .size([width, height]);
 
@@ -116,7 +116,7 @@ date: 2015-06-24T12:46:11+03:00
   };
 
   document.addEventListener("DOMContentLoaded", function (event) {
-    var canvas1 = new Canvas('#first-canvas', 678, 200, 10, -5);
+    var canvas1 = new Canvas('#first-canvas', 678, 200, 10, -200);
     canvas1.data.nodes.push({name: 'Lorem', group: 1});
     canvas1.start();
 
