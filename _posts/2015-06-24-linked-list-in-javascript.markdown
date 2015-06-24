@@ -226,14 +226,16 @@ This is my first article, so I wanted it to set the mood for my entire blog and 
 I assume all of my readers know what an array is, so I decided to move to something very similar but in the same time describing an entirely different representation of a list.
 By definition "linked list is a data structure consisting of a group of nodes which together represent a sequence. Under the simplest form, each node is composed of data and a reference (in other words, a link) to the next node in the sequence; more complex variants add additional links". So lets start with the first thing.
 
-###The Node.
+##The Node.
 
 We want to represent a simple object consisting of data and a reference to another node.
 
 {% highlight javascript %}
 function Node(data) {
   this.data = data;
+  this.data.ref = this;
   this.next = null;
+  this.prev = null;
 }
 {% endhighlight %}
 
@@ -241,15 +243,20 @@ function Node(data) {
 <a class="btn" id="add-new-node-btn">Add New One</a>
 <br>
 
-It can't get easier than that. A simple function constructor with data and a reference (next) to another node. But what we actually need is a function with which we can attach references.
+It can't get easier than that. A simple function constructor with data and a references to a next and previous node. But what we actually need is methods with which we can attach those references.
 
 {% highlight js %}
-// our reference setter
+// our reference setters
 Node.prototype.setNext(next) {
   this.next = next;
 }
+
+Node.prototype.setPrev(prev) {
+  this.prev = prev;
+}
 {% endhighlight %}
 
+##Linked List
 
 The Node is the heart of the linked list data structure and as you can see we are only inserting at the end of the last inserted node.
 OK. Lets wrap what we have so far in a LinkedList class constructor.
@@ -262,7 +269,7 @@ function LinkedList() {
 }
 {% endhighlight %}
 
-At this point you are probably thinking. "Wait a minute! This thing starts to look a lot like an array!! What is the point of all of this?!?"<br/>
+At this point you are probably thinking. "Wait a minute! This thing starts to look a lot like an array! What is the point of all of this?!?"<br/>
 <p><br></p>
 
 I am showing you all this because there's a fundamental concept in the Linked List. And that is the reference. In an array we have cells with data where we can query whichever element of the array as long as we know it's index. Here we have a reference connected to a reference, connected to a reference and so on. It's an entirely different view on the matter of connection of objects.
@@ -271,8 +278,16 @@ If you still interested in what else we can do with this data structure lets see
 
 {% highlight js %}
 LinkedList.prototype.insert = function (data) {
-  // if first is missing, make this first
-// else attach it to last and increase size
+  var node = new Node(data);
+  this.size++;
+  if (!this.first) {
+    this.first = this.last = node;
+    return;
+  }
+
+  node.setPrev(this.last);
+  this.last.setNext(node);
+  this.last = node;
 }
 {% endhighlight %}
 
@@ -281,16 +296,15 @@ Lets see how it looks when we use it.
 <div id="second-canvas" class="node-canvas"></div>
 <a id="second-btn" class="btn">Add New One</a>
 
-// add button with example adding
-
-// make an introduction to iteration and callback (high order functions)
+As you have probably noticed a general thing the array has and we don't is a way to iterate through the list. But how should we do this? Should we log the element, should we push it somewhere? Why don't we make a generic method which lets the user decide what he wants to do with the object, being that let him pass a callback function which will be executed for every element in the list.
 
 {% highlight js %}
 LinkedList.prototype.forEach = function (callback) {
   var current = this.first,
       doesContinue;
   while (current) {
-    doesContinue = callback(current.data, current.index);
+    doesContinue = callback(current, current.index);
+    // lets us break out of the loop if the user returns false
     if (doesContinue === false) {
       break;
     }
@@ -299,20 +313,61 @@ LinkedList.prototype.forEach = function (callback) {
 }
 {% endhighlight %}
 
+OK, so far we are able to add and iterate through the elements of the list, but what if we need to remove a record. If we wan't to remove an element we'll sure need to first find it.
 
-OK, so far we are able to add and iterate through the elements of the list, but what if we need to remove a record. We'll definitely need a method for removing a record, but by what "forgot the word"? Is it going to be by reference to the data, or by reference to the node?
-/*Wouldn't it be best if we try to hide the implementation of the Node entirely in the curtains of the LinkedList class and just show the data? */
+{% highlight js %}
+LinkedList.prototype.find = function (callback) {
+  var result = null;
+  this.forEach(function (el) {
+    if (callback(el) === true) {
+      result = el;
+      return false;
+    }
+  });
+  return result;
+};
+{% endhighlight %}
 
-// code for removal of a node by reference to the object
-// add a d3 example
-
-Why don't we make a generic removal method which removes by a callback function? Lets try.
+This is our find method which makes a linear search passing a callback to every element. If the callback at some point returns true it means we have met our requirements and we return that element.
 
 {% highlight js %}
 LinkedList.prototype.remove = function (callback) {
+  if (size === 0) {
+    throw Error('You can't remove from an empty list);
+    return;
+  }
+  var node = this.find(callback);
 
-}
+  // case of a one element and we have it found
+  if (node && size === 1) {
+    this.last = this.first = null;
+    return;
+  }
+
+  // case of having element somehere in the middle
+  var prev = node && node.prev;
+  var next = node && node.next;
+  if (next && prev) {
+    prev.setNext(next);
+    next.setPrev(prev);
+  }
+
+  // case of having it last
+  if (node === this.last && !next) {
+    prev.setNext(null);
+    this.last = prev;
+  }
+
+  // case of having it first
+  if (node === this.first && !prev) {
+    node.setPrev(null);
+    this.first = node;
+  }
+  this.size--;
+};
 {% endhighlight %}
+
+As you can see we are just making a linear search through the list until we find our wanted element.
 
 // show list of lists
 
