@@ -220,7 +220,8 @@ date: 2015-06-24T12:46:11+03:00
   });
 </script>
 
-This is my first article, so I wanted it to set the mood for my entire blog and best describe what I'm passionate about, Computer Sciences in a modern web environment. I also wanted it to be an introduction article.<br/>
+This is my first article, so I wanted it to set the mood for my entire blog and best describe what I'm passionate about, Computer Sciences in a modern web environment. I also wanted it to be an introduction article.
+<p><br/></p>
 
 
 I assume all of my readers know what an array is, so I decided to move to something very similar but in the same time describing an entirely different representation of a list.
@@ -367,8 +368,4 @@ LinkedList.prototype.remove = function (callback) {
 };
 {% endhighlight %}
 
-As you can see we are just making a linear search through the list until we find our wanted element.
-
-// show list of lists
-
-// show insertion sort
+I hope you you liked my first article and you've learnt something from it. As you probably already see this data structure is not very usable in the real world but is good enough to present some interesting ideas for representing data.
