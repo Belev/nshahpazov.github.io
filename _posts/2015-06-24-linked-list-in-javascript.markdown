@@ -30,16 +30,9 @@ date: 2015-06-24T12:46:11+03:00
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js" charset="utf-8"></script>
 <script>
-  var graph = {
-  "nodes":[
-    {"name": "1", "group": 1}
-  ],
-  "links":[
-    // {"source":1,"target":0,"value": 100},
-    ]
-  }
+  function Canvas(id, width, height, radius, charge) {
+    this.radius = radius;
 
-  function Canvas(id, width, height) {
     this.data = {
       nodes: [],
       links: []
@@ -47,7 +40,8 @@ date: 2015-06-24T12:46:11+03:00
     this.size = 0;
 
     this.force = d3.layout.force()
-      .charge(-200)
+      .charge(charge)
+      .gravity(0.003)
       .linkDistance(40)
       .size([width, height]);
 
@@ -60,11 +54,10 @@ date: 2015-06-24T12:46:11+03:00
   Canvas.color = d3.scale.category20();
 
   Canvas.prototype.redraw = function () {
-
     this.node = this.node.data(this.data.nodes);
     this.node.enter().insert("circle")
       .attr("class", "node")
-      .attr("r", 15)
+      .attr("r", this.radius)
       .style("fill", function (d) {
         return Canvas.color(d.group);
       })
@@ -74,20 +67,16 @@ date: 2015-06-24T12:46:11+03:00
     this.link.enter().insert("line", ".node")
       .attr("class", "link");
 
-    this.force.start();
+    return this.force.start();
   }
 
   Canvas.prototype.addNode = function (node) {
     this.data.nodes.push(node);
-    // this.redraw();
-    // this.start();
     this.size++;
   };
 
   Canvas.prototype.addEdge = function (edge) {
     this.data.links.push(edge);
-    // return this.redraw();
-    // this.start();
   };
 
   Canvas.prototype.start = function () {
@@ -108,7 +97,7 @@ date: 2015-06-24T12:46:11+03:00
         .data(this.data.nodes)
         .enter().append("circle")
           .attr("class", "node")
-          .attr("r", 15)
+          .attr("r", this.radius)
           .style("fill", function (d) { return Canvas.color(d.group); })
           .call(this.force.drag);
 
@@ -127,95 +116,28 @@ date: 2015-06-24T12:46:11+03:00
   };
 
   document.addEventListener("DOMContentLoaded", function (event) {
-    var secondCanvas = new Canvas("#second-canvas", 678, 300);
+    var canvas1 = new Canvas('#first-canvas', 678, 200, 10, -5);
+    canvas1.data.nodes.push({name: 'Lorem', group: 1});
+    canvas1.start();
+
+    // ** Update data section (Called from the onclick)
+    document.querySelector("#first-btn")
+      .addEventListener('click', function (ev) {
+        var group = parseInt(Math.random() * 356);
+        canvas1.addNode({name: 'Lorem Ipsum', group});
+        canvas1.redraw();
+      });
+
+    // second canvas and button
+    var secondCanvas = new Canvas("#second-canvas", 678, 300, 15, -200);
     secondCanvas.data.nodes.push({name: 'sss', group: 1});
     secondCanvas.start();
-    // secondCanvas.addNode({"name": "1" + Math.random() * 130, "group": 1});
 
-    document.querySelector('#second-btn')
-    .addEventListener('click', function (event) {
-      // secondCanvas.data.nodes.push({name: "ala", group: 1});
+    document.querySelector('#second-btn').addEventListener('click', function (event) {
       var group = parseInt(Math.random() * 356);
       secondCanvas.addNode({name: "ala", group: group});
       secondCanvas.addEdge({source: secondCanvas.size - 1, target: secondCanvas.size});
       secondCanvas.redraw();
-    });
-
-    var width = 678,
-        height = 200,
-        color = d3.scale.category20();
-
-    var force = d3.layout.force()
-        .charge(-800)
-        .linkDistance(400)
-        .size([width, height]);
-
-    var svg = d3.select(".node-canvas").append("svg")
-        .attr("width", width)
-        .attr("height", height);
-
-      force
-          .nodes(graph.nodes)
-          .links(graph.links)
-          .start();
-
-      var link = svg.selectAll(".link")
-        .data(graph.links)
-        .enter().append("line")
-          .attr("class", "link")
-          .style("stroke-width", function (d) {
-            return Math.sqrt(d.value);
-          });
-
-      var node = svg.selectAll(".node")
-          .data(graph.nodes)
-        .enter().append("circle")
-          .attr("class", "node")
-          .attr("r", 15)
-           // .attr("transform", function(d) {
-           //    return "translate(" + d.x + "," + d.y + ")";
-           //  })
-          .style("fill", function (d) { return color(d.group); })
-          .call(force.drag);
-
-      node.append("title")
-          .text(function(d) { return d.name; });
-
-      force.on("tick", function() {
-        link.attr("x1", function (d) { return d.source.x; })
-            .attr("y1", function (d) { return d.source.y; })
-            .attr("x2", function (d) { return d.target.x; })
-            .attr("y2", function (d) { return d.target.y; });
-
-        node.attr("cx", function(d) { return d.x; })
-            .attr("cy", function(d) { return d.y; });
-      });
-
-      function redraw() {
-        node = node.data(graph.nodes);
-        node.enter().insert("circle")
-          .attr("class", "node")
-          .attr("r", 1)
-          .transition()
-          .duration(4000)
-          .ease("elastic")
-          .style("fill", function (d) { return color(d.group); })
-          .attr("r", 15);
-
-        // node.exit().transition()
-        //   .attr("r", 0)
-        //   .remove();
-
-        force.start();
-      }
-
-      // ** Update data section (Called from the onclick)
-    var btn = document.querySelectorAll("#add-new-node-btn")[0];
-      btn.addEventListener('click', function (ev) {
-      var group = parseInt(Math.random() * 356);
-      console.log(group);
-      graph.nodes.push({name: '' + group, group: group});
-      redraw();
     });
   });
 </script>
@@ -240,8 +162,8 @@ function Node(data) {
 }
 {% endhighlight %}
 
-<div id="single-node-canvas" class="node-canvas"></div>
-<a class="btn" id="add-new-node-btn">Add New One</a>
+<div id="first-canvas"></div>
+<a id="first-btn" class="btn">Add New One</a>
 <br>
 
 It can't get easier than that. A simple function constructor with data and a references to a next and previous node. But what we actually need is methods with which we can attach those references.
@@ -276,6 +198,7 @@ At this point you are probably thinking. "Wait a minute! This thing starts to lo
 I am showing you all this because there's a fundamental concept in the Linked List. And that is the reference. In an array we have cells with data where we can query whichever element of the array as long as we know it's index. Here we have a reference connected to a reference, connected to a reference and so on. It's an entirely different view on the matter of connection of objects.
 
 If you still interested in what else we can do with this data structure lets see what we have to do to insert a new element in our list.
+<br />
 
 {% highlight js %}
 LinkedList.prototype.insert = function (data) {
@@ -293,11 +216,14 @@ LinkedList.prototype.insert = function (data) {
 {% endhighlight %}
 
 Lets see how it looks when we use it.
+<br />
 
 <div id="second-canvas" class="node-canvas"></div>
 <a id="second-btn" class="btn">Add New One</a>
+<br />
 
 As you have probably noticed a general thing the array has and we don't is a way to iterate through the list. But how should we do this? Should we log the element, should we push it somewhere? Why don't we make a generic method which lets the user decide what he wants to do with the object, being that let him pass a callback function which will be executed for every element in the list.
+<br />
 
 {% highlight js %}
 LinkedList.prototype.forEach = function (callback) {
@@ -313,8 +239,10 @@ LinkedList.prototype.forEach = function (callback) {
   }
 }
 {% endhighlight %}
+<br />
 
 OK, so far we are able to add and iterate through the elements of the list, but what if we need to remove a record. If we wan't to remove an element we'll sure need to first find it.
+<br />
 
 {% highlight js %}
 LinkedList.prototype.find = function (callback) {
@@ -330,6 +258,7 @@ LinkedList.prototype.find = function (callback) {
 {% endhighlight %}
 
 This is our find method which makes a linear search passing a callback to every element. If the callback at some point returns true it means we have met our requirements and we return that element.
+<br />
 
 {% highlight js %}
 LinkedList.prototype.remove = function (callback) {
@@ -367,5 +296,6 @@ LinkedList.prototype.remove = function (callback) {
   this.size--;
 };
 {% endhighlight %}
+<br />
 
 I hope you you liked my first article and you've learnt something from it. As you probably already see this data structure is not very usable in the real world but is good enough to present some interesting ideas for representing data.
